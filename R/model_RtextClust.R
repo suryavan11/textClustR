@@ -1,7 +1,7 @@
 ## This is to turn off scientific notation. default is 0 for keeping scientific notation
 options(scipen=999) 
 
-setwd('C:/Users/ASuryav1/OneDrive - T-Mobile USA/Abhi R packages/RtextClust')
+setwd('working directory')
 
 library(readr) ### file read write functions
 library(ggplot2)  ### plotting
