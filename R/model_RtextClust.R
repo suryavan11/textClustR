@@ -5,6 +5,8 @@ setwd('C:/Users/ASuryav1/OneDrive - T-Mobile USA/Abhi R packages/RtextClust')
 
 library(readr) ### file read write functions
 library(ggplot2)  ### plotting
+library(ggrepel)
+library(hues)
 library(lubridate)  ### date
 library(stringr) ### vectorized string conversions
 library(tidyr) ### data manipulation
@@ -18,6 +20,7 @@ library(tokenizers)
 library(text2vec)
 library(Matrix)
 library(superheat)
+library(cld2)
 library(dplyr) ### piping and chaining operations. Load this package last as it is widely used and has some conflicts with other packages, especially plyr
 
 source("R/utils.R" )
@@ -25,14 +28,14 @@ source("R/utils.R" )
 ############ read data ###############
 stopwords_longlist = readLines('data/stopwords_longlist_abhi.txt')
 
-# ######### Nalina's text
-# data11 = read_delim('conv_Jan_2019_predictions.txt','|')
-# data1 = data11%>%rename(txt = msg_clean)%>%mutate(l2='na')
-# data1 = data1%>% sample_n(30000)
+######### chat text
+data11 = read_delim('data/conv_Jan_2019_predictions.txt','|')
+data1 = data11%>%rename(txt = msg_clean)%>%mutate(l2='na')
+data1 = data1%>% sample_n(30000)
 
-######### sample data from online
-data1 = read_tsv('data/r52-train-all-terms.txt', col_names = F )
-data1 = data1%>%rename(txt = X2, l2 = X1)%>% distinct(txt, .keep_all = TRUE)
+# ######### sample data from online
+# data1 = read_tsv('data/r52-train-all-terms.txt', col_names = F )
+# data1 = data1%>%rename(txt = X2, l2 = X1)%>% distinct(txt, .keep_all = TRUE)
 
 
 ### preprocessing ###########################

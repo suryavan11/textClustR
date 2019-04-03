@@ -97,20 +97,14 @@ get.metric = function(fndtm,fnrv,fnwv, fndv, cosine.threshold = 0.8, use.dist = 
     as.matrix()
   
   rw = sim2(fnrv, fnwv, method = 'cosine', norm = 'l2')  ### cosine-reason & word
-  # rw[rw<=cosine.threshold] = NA
   dw = fndtm[,colnames(rw), drop = F]   ### doc word matrix
   dr =  sim2(fndv, fnrv, method = 'cosine', norm = 'l2') 
-  
-  # dr[dr<=0] = NA
   
   rw = rw[colnames(dr),colnames(dw), drop = F]   ### ensure that all matrices are lined up correctly before any matrix operation
   
   
   if (use.dist == T) {
     ### dist matrix
-    
-    ### for each reason, subset dr >= 0.5 or 5000 samples whichever is smaller, get softmax.rowwise(dd) and do (dd %*% dr) (no need to normalize, softmax already normalizes). this gives dr.mod
-    ### use dr.mod to calculate metric
     
     indices =   apply(dr, 2, function(x) sample(which(x>0), min(length(which(x>0)),5000, na.rm = T)  ) )  
     dr.mod = dr
@@ -119,7 +113,7 @@ get.metric = function(fndtm,fnrv,fnwv, fndv, cosine.threshold = 0.8, use.dist = 
     for (ind in 1:dim(dr)[2]) { 
       # print(ind)
       dd =   sim2(fndv[indices[[ind]],] ,  method = 'cosine', norm = 'l2') 
-      dd.soft = 1/(2-dd) #apply(dd,1,DMwR::SoftMax )
+      dd.soft = 1/(2-dd) 
       dr.mod[indices[[ind]],ind] = (dd.soft %*% dr[indices[[ind]],1,drop = F] )/rowSums(dd.soft)
     }
     
@@ -128,53 +122,14 @@ get.metric = function(fndtm,fnrv,fnwv, fndv, cosine.threshold = 0.8, use.dist = 
   
   ### wd x dr / (denom) is the weighted average of dr similarities by the tfidf counts (the denom is essentially just a sum of the tfidf weights per word. the *0+1 part creates a matrix of ones)
   ### the above weighted average says whether a word is tied to a reason, but does not account for its ties to other reasons. multiplying by t(rw) brings that in
-  ### for example card_total is weighted high for acct_maint but also for payments etc. it will be picked for acct maint if t(rw) is not present. because of t(rw) it gets weighted down
-  
-  ### original metric
-  # metric = as.matrix( (t(dw) %*% dr)/(t(dw) %*% (dr*0 + 1) ) * t(rw) )
-  
-  #metric with dr.mod
+
   if (use.dist == T) {
     metric = as.matrix( (t(dw) %*% dr.mod)/(t(dw) %*% (dr*0 + 1) ) * t(rw) )
   } else {
     metric = as.matrix( (t(dw) %*% dr)/(t(dw) %*% (dr*0 + 1) ) * t(rw) )
   }
   
-  
-  
-  
-  
-  
-  # ggplot(melt(as.matrix(dr)), aes(Var1,Var2, fill=value)) + geom_raster()
-  ##  coldiss(as.matrix(dr))
-  # seriation::hmap(as.matrix(dr[1:100,]), distfun = dist, method = "OLO", control = NULL, zlim = NULL)
-  # plot_cosine_heatmap(as.matrix(dr), col_order, cluster_rows = TRUE, method = "complete", plot_values = FALSE)
-  
-  # temp = as.matrix(dr[1:100,])
-  # 
-  # cosine.silhouette <- cosineSilhouette(temp, rownames(temp))
-  # # arrange the words in the same order as the original matrix
-  # rownames(cosine.silhouette) <- cosine.silhouette$word
-  # cosine.silhouette <- cosine.silhouette[rownames(cosine.similarity.full), ]
-  # 
-  # superheat::superheat(temp,
-  #           # cluster membership for words
-  #           membership.rows = rownames(temp),
-  #           membership.cols = colnames(temp),
-  #           # silhouette plot
-  #           yt = cosine.silhouette.width,
-  #           yt.axis.name = "Cosine silhouette width",
-  #           yt.plot.type = "bar",
-  #           yt.bar.col = "grey35",
-  #           # row/col order
-  #           order.rows = order(cosine.silhouette.width),
-  #           order.cols = order(cosine.silhouette.width),
-  #           # labels
-  #           bottom.label.text.angle = 90,
-  #           bottom.label.text.alignment = "right",
-  #           left.label.text.alignment = "right",
-  #           # smoothing option
-  #           smooth.heat = TRUE)
+ 
   ##################################################################
   
   
@@ -188,8 +143,7 @@ get.metric = function(fndtm,fnrv,fnwv, fndv, cosine.threshold = 0.8, use.dist = 
   # ungroup()
   
   
-  # tmp = word.list%>%filter(reasons2 == 'cr_fraud1')%>%arrange(desc(metric))%>%select(metric)%>%mutate(rn = exp(-row_number()) , wt = rn*metric)
-  
+
   
   return(word.list)
   
@@ -360,11 +314,6 @@ get.reason.vectors <- function(fnoldrv,fnorigrv, fnwv,word.list, weigh.by.simila
     temp = 1-temp
     temp[temp<alpha] = alpha
     
-    # temp = psim2(fnrv, fnorigrv,method = 'cosine', norm = 'l2') 
-    # temp = ifelse(temp<=beta,1,alpha)
-    
-    # temp = alpha
-    
     fnrv = fnrv * (1-temp) + fnoldrv * temp
     fnrv = data.frame(fnrv)%>%
       mutate(reasons2 = rownames(.), reasons = str_remove_all(reasons2,'[0-9]+$') )
@@ -410,7 +359,6 @@ unsup.choose.keywords <- function(fndf, fndv, fnvocab, nclust = 50,keywords.per.
                                 aes(x=x, y=y,label=desc, color = as.factor(as.integer(desc))),
                                 fontface = 'bold' ) +
       scale_color_manual(values=rev(hues::iwanthue(200))) +
-      # theme_minimal() +
       theme(legend.position="none")
     
   }
@@ -567,16 +515,6 @@ cluster.reason.vectors <- function(fndf, fndtm, fnwv,fndv, orig.word.list, contr
       filter( rank(desc(metric), ties.method="first")<= flag  )%>%
       ungroup()
     
-    # cosine.distances = cosine.distances%>%
-    #   group_by(reasons,reasons2)%>%
-    #    top_n(ifelse( iter <=control.param$keywords.per.topic,iter,control.param$keywords.per.topic),metric)%>%
-    #   ungroup()
-    
-    # fndf = update.dataset.newcr(cosine.distances, fndtm, fndf)
-    # cosine.distances = get.category.overlap(cosine.distances,fndf)
-    # cosine.distances = get.category.coverage(cosine.distances, fndf)
-    # cosine.distances = get.dataset.coverage(cosine.distances, fndf)
-    
     cosine.distances$sign = 1
     
     
@@ -615,11 +553,7 @@ cluster.reason.vectors <- function(fndf, fndtm, fnwv,fndv, orig.word.list, contr
     
     remove.list = as.character(unique(temp1$reasonsB)[! unique(temp1$reasonsB) %in% unique(temp1$reasonsA)])
     
-    # cosine.distances = cosine.distances[!cosine.distances$reasons2 %in% remove.list,]
-    # fnrv = fnrv[!fnrv$reasons2 %in% remove.list,]
-    #  fndf = update.dataset.newcr(cosine.distances, fndtm, fndf)
-    
-    
+ 
     silh = calculate.silhouette(fnrv, fndv,  plot.silhouette = F, 
                                 fast.silhouette.calc = control.param$fast.silhouette.calc )
     
@@ -633,19 +567,13 @@ cluster.reason.vectors <- function(fndf, fndtm, fnwv,fndv, orig.word.list, contr
                             pull(membership1)
       )
       print(temp)
-      # temp = as.character(silh$membership1[silh$silh <= control.param$silhouette.threshold])
       remove.list = unique(c(remove.list, temp ) )
     }
     
     cosine.distances = cosine.distances[!cosine.distances$reasons2 %in% remove.list,]
     fnrv = fnrv[!fnrv$reasons2 %in% remove.list,]
     
-    # print(fnrv$reasons2[fnrv$reasons2 %in% remove.list])
-    # print(cosine.distances$reasons2[cosine.distances$reasons2 %in% remove.list])
-    
-    # fndf = update.dataset.newcr(cosine.distances, fndtm, fndf)
-    
-    
+ 
     
     
     #########################################################
@@ -723,7 +651,6 @@ plot.cluster.results <- function(rtsne_out,  random.indices, fnlabels ) {
                               aes(x=x, y=y,label=desc, color = as.factor(as.integer(desc))),
                               fontface = 'bold' ) +
     scale_color_manual(values=rev(hues::iwanthue(200))) +
-    # theme_minimal() +
     theme(legend.position="none")
   
   return(g1)
