@@ -23,7 +23,7 @@ library(superheat)
 library(cld2)
 library(dplyr) ### piping and chaining operations. Load this package last as it is widely used and has some conflicts with other packages, especially plyr
 
-source("R/utils.R" )
+source("R/utils.R" )  ## change path name based on your local path
 
 ############ read data ###############
 stopwords_longlist = readLines('data/stopwords_longlist_abhi.txt')
