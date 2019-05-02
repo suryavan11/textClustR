@@ -33,7 +33,7 @@ data11 = read_delim('data/conv_Jan_2019_predictions.txt','|')
 data1 = data11%>%rename(txt = msg_clean)%>%mutate(l2='na')
 data1 = data1%>% sample_n(30000)
 
-# ######### sample data from online
+# ######### sample data 
 # data1 = read_tsv('data/r52-train-all-terms.txt', col_names = F )
 # data1 = data1%>%rename(txt = X2, l2 = X1)%>% distinct(txt, .keep_all = TRUE)
 
@@ -67,8 +67,9 @@ random.indices = return.list$random.indices
 seed.words.orig = unsup.choose.keywords(data3, doc_vectors, vocab, nclust = 50, keywords.per.clust=3, plot=F)
 
 ##### keywords for seeded clustering 
-# seed.words.orig = data.frame( 'words' = c('accessories','authorized','cancel_service','credit','exchange','power,button','port,add','reset','complaint,escalation','fraud','hotspot','outage','payment -arrangement', 'autopay', 'arrangement','insurance,crack','data,plan,roaming,netflix,unlimited','return','charge,fee','restore','unlock,sim','upgrade,jump,trade','website', 'troubleshoot,wifi,bluetooth,mode'),
-#                               'reasons' = c('cr_accessories','cr_account_maintenance','cr_cancel_an_account_or_msisdn','cr_credits_and_adjustments','cr_device_exchange','cr_device_hardware_issues','cr_device_or_account_activation','cr_device_software_issues','cr_escalation_or_complaint','cr_fraud','cr_mobile_broadband','cr_network_or_coverage','cr_payment','cr_autopay','cr_payment_arrangement','cr_phone_protection_solutions','cr_rate_plan_or_plan_fit_analysis','cr_return_device','cr_review_bill','cr_suspend_or_restore_service','cr_unlock_device','cr_upgrade_device','cr_website_navigation', 'cr_how_to_use_device'),
+#### words can be added/substracted, ngrams can be included with '_'
+# seed.words.orig = data.frame( 'words' = c('word1','word2','word3_word4','word5,word6','word7 -word8'),
+#                               'reasons' = c('reason1','reason2','reason3','reason4','reason5'),
 #                               stringsAsFactors = FALSE)
 # seed.words.orig$type = 'seeded'
 
